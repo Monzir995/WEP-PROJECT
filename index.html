@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .hidden { display: none !important; } /* Force hide */
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: bold; color: #0d6efd !important; }
+        .nav-link:hover { color: #0a58ca !important; text-decoration: underline !important; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">📚 MyLibrary</a>
+            
+            <div class="d-flex ms-auto gap-3 align-items-center">
+                <button class="btn btn-link nav-link text-decoration-none text-dark fw-semibold" onclick="showSection('home-section')">Home</button>
+                <button class="btn btn-link nav-link text-decoration-none text-dark fw-semibold" onclick="showSection('books-section')">Books</button>
+                
+                <button class="btn btn-link nav-link text-decoration-none text-primary fw-bold hidden" id="navDashboard" onclick="goToDashboard()">Dashboard</button>
+
+                <button class="btn btn-primary btn-sm px-4 rounded-pill" onclick="showSection('home-section')" id="navLogin">Login</button>
+                <button class="btn btn-danger btn-sm px-4 rounded-pill hidden" onclick="logout()" id="navLogout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+
+        <div id="home-section">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card p-4 border-0">
+                        <h3 class="text-center mb-4">Welcome Back</h3>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="login_email" class="form-control" placeholder="name@example.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" id="login_password" class="form-control" placeholder="Enter password" required>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isAdmin">
+                                <label class="form-check-label" for="isAdmin">Login as Librarian</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2">Login</button>
+                        </form>
+                        <p class="text-center mt-3 text-muted">
+                            Don't have an account? <a href="#" class="text-decoration-none" onclick="showSection('register-section')">Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="register-section" class="hidden">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card p-4 border-0">
+                        <h3 class="mb-4 text-center">Create Account</h3>
+                        <form id="registerForm">
+                            <div class="row">
+                                <div class="col-6 mb-3"><input type="text" id="first_name" class="form-control" placeholder="First Name" required></div>
+                                <div class="col-6 mb-3"><input type="text" id="last_name" class="form-control" placeholder="Last Name" required></div>
+                            </div>
+                            <div class="mb-3"><input type="email" id="email" class="form-control" placeholder="Email Address" required></div>
+                            <div class="mb-3"><input type="password" id="password" class="form-control" placeholder="Password (8+ chars)" required></div>
+                            <div class="mb-3"><input type="text" id="phone" class="form-control" placeholder="Phone Number"></div>
+                            <div class="mb-3"><input type="text" id="address" class="form-control" placeholder="Address"></div>
+                            <button type="submit" class="btn btn-success w-100 py-2">Register</button>
+                            <p class="text-center mt-3"><a href="#" class="text-decoration-none" onclick="showSection('home-section')">Back to Login</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="books-section" class="hidden">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>📚 Book Catalog</h2>
+                <div class="d-flex">
+                    <input type="text" id="bookSearchInput" class="form-control me-2" placeholder="Title or Author..." style="width: 250px;">
+                    <button class="btn btn-outline-primary" onclick="loadBooks()">Search</button>
+                </div>
+            </div>
+            <div id="bookList" class="row g-4"></div>
+        </div>
+
+        <div id="member-dashboard" class="hidden">
+            <h2 class="mb-4">My Dashboard</h2>
+            <div class="card p-4 border-0">
+                <h4 class="mb-3">My Active Loans</h4>
+                <div id="myLoansList" class="list-group list-group-flush"></div>
+            </div>
+        </div>
+
+        <div id="admin-dashboard" class="hidden">
+            <div class="alert alert-dark d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">Librarian Dashboard</h4>
+                    <small>Authorized Access Only</small>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3"><div class="card text-white bg-primary mb-3 h-100"><div class="card-header border-0">Total Members</div><div class="card-body"><h2 class="card-title text-center" id="stat_members">0</h2></div></div></div>
+                <div class="col-md-3"><div class="card text-white bg-success mb-3 h-100"><div class="card-header border-0">Total Books</div><div class="card-body"><h2 class="card-title text-center" id="stat_books">0</h2></div></div></div>
+                <div class="col-md-3"><div class="card text-white bg-warning mb-3 h-100"><div class="card-header border-0 text-dark">Active Loans</div><div class="card-body"><h2 class="card-title text-center text-dark" id="stat_loans">0</h2></div></div></div>
+                <div class="col-md-3"><div class="card text-white bg-info mb-3 h-100"><div class="card-header border-0">Available Books</div><div class="card-body"><h2 class="card-title text-center" id="stat_available">0</h2></div></div></div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card p-4 h-100">
+                        <h5 class="mb-3">Add New Book</h5>
+                        <form id="addBookForm">
+                            <input type="text" id="new_isbn" class="form-control mb-2" placeholder="ISBN" required>
+                            <input type="text" id="new_title" class="form-control mb-2" placeholder="Title" required>
+                            <input type="text" id="new_author" class="form-control mb-2" placeholder="Author" required>
+                            <input type="number" id="new_price" class="form-control mb-3" placeholder="Price">
+                            <button type="submit" class="btn btn-danger w-100">Add Book</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">System Loans (Member Details)</h5>
+                            <div class="d-flex">
+                                <input type="text" id="loanSearchInput" class="form-control me-2 form-control-sm" placeholder="Search Book or Member...">
+                                <button class="btn btn-secondary btn-sm" onclick="loadAllLoans()">Search</button>
+                            </div>
+                        </div>
+                        <div id="allLoansList" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentMemberId = null;
+        let isCurrentUserAdmin = false;
+
+        // --- NAVIGATION ---
+        function showSection(id) {
+            // Hide all sections
+            ['home-section', 'register-section', 'books-section', 'member-dashboard', 'admin-dashboard'].forEach(sid => {
+                document.getElementById(sid).classList.add('hidden');
+            });
+            // Show target section
+            document.getElementById(id).classList.remove('hidden');
+            
+            // Auto-load data based on section
+            if(id === 'books-section') {
+                document.getElementById('bookSearchInput').value = '';
+                loadBooks();
+            }
+            if(id === 'admin-dashboard') {
+                loadAdminStats();
+                loadAllLoans(); // Auto-load loans when dashboard opens
+            }
+            if(id === 'member-dashboard') {
+                loadMyLoans();
+            }
+        }
+
+        // The "Dashboard" button logic
+        function goToDashboard() {
+            if (isCurrentUserAdmin) {
+                showSection('admin-dashboard');
+            } else if (currentMemberId) {
+                showSection('member-dashboard');
+            } else {
+                alert("Please login first.");
+                showSection('home-section');
+            }
+        }
+
+        function logout() {
+            currentMemberId = null;
+            isCurrentUserAdmin = false;
+            
+            document.getElementById('navLogin').classList.remove('hidden');
+            document.getElementById('navLogout').classList.add('hidden');
+            document.getElementById('navDashboard').classList.add('hidden'); // Hide dashboard button
+            
+            // Clear inputs
+            document.getElementById('login_email').value = '';
+            document.getElementById('login_password').value = '';
+            
+            showSection('home-section');
+            alert("Logged out.");
+        }
+
+        // --- AUTH ---
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login_email').value;
+            const password = document.getElementById('login_password').value;
+            const isAdmin = document.getElementById('isAdmin').checked;
+            const url = isAdmin ? 'http://localhost:3000/admin/login' : 'http://localhost:3000/login';
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Update Navbar
+                    document.getElementById('navLogin').classList.add('hidden');
+                    document.getElementById('navLogout').classList.remove('hidden');
+                    document.getElementById('navDashboard').classList.remove('hidden'); // Show Dashboard button
+
+                    if (isAdmin) {
+                        isCurrentUserAdmin = true;
+                        alert("Welcome Librarian!");
+                        showSection('admin-dashboard');
+                    } else {
+                        isCurrentUserAdmin = false;
+                        currentMemberId = data.user.member_ID;
+                        alert("Welcome Member!");
+                        showSection('member-dashboard');
+                    }
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) { console.error(err); }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value
+            };
+            await fetch('http://localhost:3000/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            });
+            alert("Registered successfully!");
+            showSection('home-section');
+        });
+
+        // --- BOOKS ---
+        async function loadBooks() {
+            const query = document.getElementById('bookSearchInput').value;
+            const url = query ? `http://localhost:3000/books?q=${query}` : 'http://localhost:3000/books';
+            
+            const res = await fetch(url);
+            const books = await res.json();
+            const list = document.getElementById('bookList');
+            list.innerHTML = '';
+            
+            if(books.length === 0) {
+                list.innerHTML = '<div class="col-12 text-center text-muted py-5"><h4>No books found.</h4></div>';
+                return;
+            }
+
+            books.forEach(book => {
+                let btn = '';
+                let statusBadge = '';
+                if(book.Status === 'Available') {
+                    statusBadge = '<span class="badge bg-success mb-2">Available</span>';
+                    btn = `<button class="btn btn-outline-success w-100" onclick="borrowBook(${book.Book_ID})">Borrow</button>`;
+                } else {
+                    statusBadge = `<span class="badge bg-danger mb-2">${book.Status}</span>`;
+                    btn = `<button class="btn btn-outline-info w-100" onclick="reserveBook(${book.Book_ID})">Reserve</button>`;
+                }
+
+                list.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">${book.Title}</h5>
+                                <h6 class="card-subtitle mb-3 text-muted">by ${book.Author}</h6>
+                                ${statusBadge}
+                                <div class="mt-3">${btn}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function borrowBook(id) {
+            if(!currentMemberId) return alert("Login first!");
+            await fetch('http://localhost:3000/borrow', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ book_id: id, member_id: currentMemberId, due_date: '2025-12-30' })
+            });
+            loadBooks();
+        }
+
+        async function reserveBook(id) {
+            if(!currentMemberId) return alert("Login first!");
+            const res = await fetch('http://localhost:3000/reserve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ book_id: id, member_id: currentMemberId })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+        }
+
+        // --- MEMBER DASHBOARD ---
+        async function loadMyLoans() {
+            const res = await fetch(`http://localhost:3000/my-loans?member_id=${currentMemberId}`);
+            const loans = await res.json();
+            const list = document.getElementById('myLoansList');
+            list.innerHTML = '';
+
+            if(loans.length === 0) {
+                list.innerHTML = '<div class="text-center py-4 text-muted">You have no active loans.</div>';
+                return;
+            }
+
+            loans.forEach(loan => {
+                let fineHtml = loan.fine_amount > 0 ? `<span class="badge bg-danger ms-2">Fine: $${loan.fine_amount}</span>` : '';
+                list.innerHTML += `
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3">
+                        <div>
+                            <h6 class="mb-1 fw-bold">${loan.Title}</h6>
+                            <small class="text-muted">Due: ${loan.Due_date.split('T')[0]}</small>
+                            ${fineHtml}
+                        </div>
+                        <button class="btn btn-warning btn-sm" onclick="returnBook(${loan.Book_ID})">Return</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function returnBook(id) {
+            if(!confirm("Are you sure you want to return this book?")) return;
+            
+            try {
+                const res = await fetch('http://localhost:3000/return', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ book_id: id })
+                });
+                const result = await res.json();
+                
+                if(res.ok) {
+                    alert("Success: Book returned!");
+                    loadMyLoans(); // Refresh User Dashboard
+                    loadBooks();   // Refresh Book Catalog
+                    loadAllLoans(); // Refresh Admin Dashboard (if open)
+                } else {
+                    alert("Error: " + result.error);
+                }
+            } catch(err) { console.error(err); }
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        async function loadAdminStats() {
+            try {
+                const res = await fetch('http://localhost:3000/admin/stats');
+                const stats = await res.json();
+                document.getElementById('stat_members').innerText = stats.total_members;
+                document.getElementById('stat_books').innerText = stats.total_books;
+                document.getElementById('stat_loans').innerText = stats.active_loans;
+                document.getElementById('stat_available').innerText = stats.available_books;
+            } catch(err) { console.error(err); }
+        }
+
+        document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                isbn: document.getElementById('new_isbn').value,
+                title: document.getElementById('new_title').value,
+                author: document.getElementById('new_author').value,
+                price: document.getElementById('new_price').value
+            };
+
+            const res = await fetch('http://localhost:3000/books', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const result = await res.json();
+            if(res.ok) {
+                alert("Book Added Successfully!");
+                document.getElementById('addBookForm').reset();
+                loadAdminStats();
+            } else {
+                alert("Error: " + result.error);
+            }
+        });
+
+        // REFACTORED: Load All Loans Function
+        async function loadAllLoans() {
+            const query = document.getElementById('loanSearchInput').value;
+            const url = query ? `http://localhost:3000/all-loans?q=${query}` : 'http://localhost:3000/all-loans';
+
+            try {
+                const res = await fetch(url);
+                const loans = await res.json();
+                const list = document.getElementById('allLoansList');
+                
+                if(loans.length === 0) {
+                    list.innerHTML = "<p class='text-muted text-center py-3'>No active loans found.</p>";
+                    return;
+                }
+
+                let html = '<div class="list-group">';
+                loans.forEach(l => {
+                    // Check if First_name exists, otherwise fallback to "Unknown Member"
+                    const memberName = (l.First_name && l.last_name) ? `${l.First_name} ${l.last_name}` : 'Unknown Member';
+                    const status = l.Return_date ? '<span class="badge bg-success">Returned</span>' : '<span class="badge bg-warning text-dark">Active</span>';
+                    
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 fw-bold text-primary">${l.Title}</h6>
+                                <small class="text-danger fw-bold">Due: ${l.Due_date.split('T')[0]}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Borrowed by: <strong>${memberName}</strong></small>
+                                <div class="mt-1">${status}</div>
+                            </div>
+                        </div>`;
+                });
+                list.innerHTML = html + "</div>";
+            } catch(err) { console.error(err); }
+        }
+    </script>
+</body>
+</html>
