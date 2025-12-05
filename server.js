@@ -8,19 +8,13 @@ app.use(cors());
 app.use(express.json());
 
 // --- DATABASE CONNECTION ---
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Munzirali915@@', // Your Password
-    database: 'library_db'
-});
+require('dotenv').config(); 
 
-db.connect((err) => {
-    if (err) {
-        console.error('❌ Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('✅ Connected to MySQL Database');
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 // --- ROUTES ---
@@ -187,4 +181,5 @@ app.get('/admin/stats', (req, res) => {
 // --- START ---
 app.listen(3000, () => {
     console.log('🚀 FINAL SERVER running on port 3000');
+
 });
