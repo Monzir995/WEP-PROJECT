@@ -2,9 +2,9 @@
 
 A full-stack web application designed to manage library operations efficiently. This system allows members to browse, borrow, and reserve books, while providing librarians with a powerful dashboard to manage inventory, track loans, and view statistics.
 
-🚀 Features
+ Features
 
-👤 Member Features
+ Member Features
 
 User Authentication: Secure registration and login system.
 
@@ -56,14 +56,12 @@ Git installed.
 
 2. Clone the Repository
 
-git clone [https://github.com/YOUR_USERNAME/library-management-system.git](https://github.com/YOUR_USERNAME/library-management-system.git)
+git clone ((https://github.com/Monzir995/WEP-PROJECT.git))
 cd library-management-system
-
 
 3. Install Dependencies
 
 npm install
-
 
 4. Database Setup
 
@@ -77,7 +75,6 @@ Important: Insert the initial Librarian account:
 
 INSERT INTO Librarian (first_name, last_name, Email, Password) 
 VALUES ('Alice', 'Admin', 'librarian@library.com', 'Lib123ab');
-
 
 5. Environment Configuration
 
@@ -104,8 +101,6 @@ You should see: 🚀 FINAL SERVER running on port 3000
 Open index.html in your browser (or use Live Server in VS Code).
 
 🧪 Testing Credentials
-
-Use these credentials to test the different roles:
 
 Role
 
